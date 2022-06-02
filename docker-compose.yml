@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  nginx:
+    build:
+      context: ./
+      dockerfile: ./docker/nginx/Dockerfile
+    container_name: nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker/nginx/server.conf:/etc/nginx/conf.d/server.conf:delegated
+    networks:
+      - local
+    depends_on:
+      - php
+  php:
+    build:
+      context: ./
+      dockerfile: ./docker/php/Dockerfile
+    container_name: php
+    volumes:
+      - ./:/var/www/html:delegated
+    networks:
+      - local
+  db:
+    image: postgres:13.1-alpine
+    container_name: service_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: db
+      POSTGRES_PASSWORD: db
+      POSTGRES_DB: starwars
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - local
+networks:
+  local:
+    driver: bridge
+volumes:
+  pgdata:
+    driver: local
